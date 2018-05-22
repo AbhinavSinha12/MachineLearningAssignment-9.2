@@ -15,17 +15,49 @@ features = pd.DataFrame(boston.data, columns=boston.feature_names)
 targets = boston.target
 
 
+#import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn import datasets
 
 
+#loading boston data
+boston = datasets.load_boston()
+features = pd.DataFrame(boston.data, columns=boston.feature_names)
+targets = boston.target
+
+#creating training data set and test data set
+X_train, X_test, y_train, y_test = train_test_split(features, targets, test_size=0.2, random_state=0)
+scaler = StandardScaler().fit(X_train)
+
+X_train_scaled = pd.DataFrame(scaler.transform(X_train), index=X_train.index.values, columns=X_train.columns.values)
+#X_train_scaled = pd.DataFrame(scaler.transform(X_train), index=X_train.index, columns=X_train.columns)
+X_test_scaled = pd.DataFrame(scaler.transform(X_test), index=X_test.index.values, columns=X_test.columns.values)
 
 
+rf = RandomForestRegressor(n_estimators=500, oob_score=True, random_state=0)
+rf.fit(X_train, y_train)
+
+predicted_train = rf.predict(X_train)
+predicted_test = rf.predict(X_test)
+
+plt.figure(figsize=(8, 6))
+plt.scatter(y_test, predicted_test, color='g')
+plt.plot([0, 50], [0, 50], '--')
+plt.axis('tight')
+plt.xlabel('Actual price')
+plt.ylabel('Predicted price')
+plt.tight_layout()
+
+test_score = r2_score(y_test, predicted_test)
+spearman = spearmanr(y_test, predicted_test)
+pearson = pearsonr(y_test, predicted_test)
+print(f'Out-of-bag R-2 score estimate: {rf.oob_score_:>5.3}')
+print(f'Test data R-2 score: {test_score:>5.3}')
+print(f'Test data Spearman correlation: {spearman[0]:.3}')
+print(f'Test data Pearson correlation: {pearson[0]:.3}')
 
 
-
-
-
-
-
-
-
-NOTE:​ ​The​ ​solution​ ​shared​ ​through​
